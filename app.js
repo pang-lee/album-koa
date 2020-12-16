@@ -90,8 +90,7 @@ app.use(router.routes(), router.allowedMethods())
 const compress = require('koa-compress') /**开启gzip */
 app.use(compress({threshold:'2kb'}))
 const serve = require('koa-static')
-app.use(serve(path.join(__dirname, './static')), {  })
-
+app.use(serve(path.join(__dirname, './public')), {  })
 
 app.use(async (ctx, next) => {
   try {
