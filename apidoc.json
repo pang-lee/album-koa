@@ -1,0 +1,12 @@
+{
+    "name": "Apidoc Example",
+    "version": "1.0.0",
+    "description": "Apidoc Example descrption",
+    "title": "Custom apiDoc browser title",
+    "url": "http://localhost:3000",
+    "sampleUrl": "http://localhost:3000",
+    "template": {
+        "withCompare": true,
+        "withGenerator": true
+    }
+}

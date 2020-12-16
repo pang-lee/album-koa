@@ -1,0 +1,49 @@
+{
+  "name": "koa",
+  "description": "node-server with koa2.js",
+  "version": "1.0.0",
+  "main": "app.js",
+  "scripts": {
+    "dev": "nodemon app.js",
+    "api": "npx apidoc -i ./router -o static/apidoc",
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/xiawang1024/koa-template.git"
+  },
+  "keywords": [
+    "koa-template"
+  ],
+  "author": "koa_user",
+  "license": "ISC",
+  "dependencies": {
+    "@south-paw/koa-mongoose": "^1.1.0",
+    "apollo-server-koa": "^2.19.0",
+    "bcrypt": "^5.0.0",
+    "dotenv": "^8.2.0",
+    "graphql": "^15.4.0",
+    "jsonwebtoken": "^8.5.1",
+    "koa": "^2.13.0",
+    "koa-bodyparser": "^4.3.0",
+    "koa-compress": "^5.0.1",
+    "koa-router": "^10.0.0",
+    "koa-static": "^5.0.0",
+    "koa2-cors": "^2.0.6",
+    "nodemailer": "^6.4.17",
+    "nodemailer-smtp-transport": "^2.7.4",
+    "uuid": "^8.3.2"
+  },
+  "devDependencies": {
+    "@types/node": "^14.14.14",
+    "apidoc": "^0.25.0",
+    "nodemon": "^2.0.6"
+  },
+  "bugs": {
+    "url": "https://github.com/xiawang1024/koa-template/issues"
+  },
+  "engines": {
+    "node": ">= 7.6"
+  },
+  "homepage": "https://github.com/xiawang1024/koa-template#readme"
+}
