@@ -5,12 +5,17 @@ router.get('/', async(ctx, next) =>{
 })
 
 router.post('/', async(ctx, next) =>{
-    ctx.body = 'success post image'
-    let postdata = "";
-    ctx.req.addListener('data', (data) => {
-        console.log(data)
-        postdata += data
-    })
+    try {
+        ctx.body = 'success post image'
+        let postdata = ''
+        ctx.req.addListener('data', (data) => {
+            postdata += data
+            console.log(typeof postdata)
+        })        
+    } catch (error) {
+        console.log("This is post photo error", error)
+    }
+
 })
 
 module.exports = router
