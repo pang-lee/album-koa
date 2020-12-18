@@ -1,6 +1,6 @@
 const { gql } = require('apollo-server-koa')
 const bookSchema = require('./book')
-// const userSchema = require('./user')
+const userSchema = require('./user')
 
 const typeDefs = gql`
   type Query {
@@ -22,8 +22,6 @@ const resolvers = {
 }
 
 module.exports = {
-  typeDefs: [ typeDefs, bookSchema.typeDefs ],
-  resolvers: [ resolvers, bookSchema.resolvers ]
-  // typeDefs: [ typeDefs, bookSchema.typeDefs, userSchema.typeDefs ],
-  // resolvers: [ resolvers, bookSchema.resolvers, userSchema.resolvers ]
+  typeDefs: [ typeDefs, bookSchema.typeDefs, userSchema.typeDefs ],
+  resolvers: [ resolvers, bookSchema.resolvers, userSchema.resolvers ]
 }

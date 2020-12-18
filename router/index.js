@@ -8,7 +8,6 @@
  */
 
 const router = require('koa-router')()
-
 /**
  * 子路由模块
  */
@@ -17,7 +16,6 @@ const upload = require('./upload')
 
 router.use('/test', test.routes(), test.allowedMethods())
 router.use('/upload', upload.routes(), upload.allowedMethods())
-
 
 module.exports = router
 

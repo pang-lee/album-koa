@@ -1,7 +1,6 @@
 const router = require('koa-router')();
 const { getUser, addUser } = require('../controller/test');
 
-
 /**
  * 
  * @api {get} /user/:id Get user info
