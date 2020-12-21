@@ -24,17 +24,19 @@ const typeDefs = gql`
         username: String!
         email: String!
         password: String!
-        token: String!
+        access_token: String!
+        refresh_token: String!
     }
 
     type login{
         id: ID!
-        token: String!
+        access_token: String!
+        refresh_token: String!
     }
 
     extend type Query {
-        getUser: user
         getUsers: [user]
+        getMe: user
     }
 
     extend type Mutation {
@@ -49,7 +51,7 @@ const typeDefs = gql`
 const resolvers = {
     Query: {
         getUsers: userController.getAll,
-        // getUser: userController.getMe
+        getMe: userController.getMe
     },
     Mutation: {
         verify_login: userController.verify_login,

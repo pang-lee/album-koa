@@ -6,6 +6,17 @@ const bcrypt = require('bcrypt')
 
 module.exports = {
     getAll: async (_, args, { koa }) => await koa.model('User').find(),
+    getMe: async (_, args, { koa }) => {
+        try {
+            let token = koa.cookies.get('access_token')
+            if(token) {
+                let me = jwt.verify(token, process.env.SECRET)
+                return await koa.model('User').findById(me.uid)
+            } else return new ForbiddenError('Your session expired. Sign in again.')
+        } catch (error) {
+            console.log("This is getMe error", error)
+        }
+    },
     verify_signup: async(_, { input }, { koa, mailer }) => {
         try {
             let user = await koa.model('User').find({ email: input.email })
@@ -46,8 +57,9 @@ module.exports = {
             if(find_code.length == 0) return new ForbiddenError('Code Not Found Or Typo')
             await koa.model('SignUpCode').deleteOne({ verify_code: find_code[0].verify_code, id: find_code[0].id, email: find_code[0].email, password: find_code[0].password, username: find_code[0].username })
             let create = await koa.model('User').create({ id: find_code[0].id, email: find_code[0].email, password: find_code[0].password, username: find_code[0].username})
-            let sign = { token: jwt.sign({ uid: `${find_code[0].email}` }, process.env.SECRET, { expiresIn: '1d' }) }
-            return Object.assign(create, sign)
+            let access_token = { access_token: jwt.sign({ uid: find_code[0]._id }, process.env.SECRET, { expiresIn: '15min' }) }
+            let refresh_token = { refresh_token: jwt.sign({ uid: find_code[0]._id }, process.env.SECRET, { expiresIn: '7d' }) }
+            return Object.assign(create, access_token, refresh_token)
         } catch(error) {
             console.log("This is signUp error", error)
         }
@@ -92,8 +104,14 @@ module.exports = {
             if(find_code.length == 0) return new ForbiddenError('Code Not Found Or Typo')
             await koa.model('LogInCode').deleteOne({ verify_code: find_code[0].verify_code, email: find_code[0].email })
             let user = await koa.model('User').find({ email: find_code[0].email })
-            let sign = { token: jwt.sign({ uid: user[0] }, process.env.SECRET, { expiresIn: '1d' }) }
-            return Object.assign(user[0], sign)
+            let access_token = { access_token: jwt.sign({ uid: user[0]._id }, process.env.SECRET, { expiresIn: '15min' }) }
+            let refresh_token = { refresh_token: jwt.sign({ uid: user[0]._id }, process.env.SECRET, { expiresIn: '7d' }) }
+
+            koa.cookies.set('access_token', access_token.access_token)
+
+            koa.cookies.set('refresh_token', refresh_token.refresh_token)
+
+            return Object.assign(user[0], access_token, refresh_token)
         } catch(error) {
             console.log("This is login error", error)
         }
@@ -114,7 +132,7 @@ module.exports = {
                 `
             }, (error, info) => {
                 if (error) {
-                    console.log("This is forget mailer error",error)
+                    console.log("This is forget mailer error", error)
                     transporter.close()
                 } else {     
                     console.log('Email sent: ' + info.response)
@@ -124,7 +142,7 @@ module.exports = {
             await koa.model('User').findByIdAndUpdate(user[0]._id, { password: encrypt }, { useFindAndModify: false })
             return encrypt
         } catch (error) {
-            console.log("This is forget error" ,error)
+            console.log("This is forget error", error)
         }
     }
 }

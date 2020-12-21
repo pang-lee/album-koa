@@ -62,7 +62,7 @@ const server = new ApolloServer({
       }
     }))
   })
-});
+})
 
 server.applyMiddleware({ app })
 
