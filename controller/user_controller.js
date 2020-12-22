@@ -8,11 +8,28 @@ module.exports = {
     getAll: async (_, args, { koa }) => await koa.model('User').find(),
     getMe: async (_, args, { koa }) => {
         try {
-            let token = koa.cookies.get('access_token')
-            if(token) {
-                let me = jwt.verify(token, process.env.SECRET)
+            let access_token
+            let access_token_expirationDate
+            let refresh_token
+            let refresh_token_expirationDate
+
+            if(koa.req){
+                if (!koa.request.headers.cookie) return null
+                let accessCookie = koa.request.headers.cookie.split(';').find((c) => c.trim().startsWith('album_access_token='))
+                let refreshCookie = koa.request.headers.cookie.split(';').find((c) => c.trim().startsWith('album_refresh_token='))                
+                if (!accessCookie || !refreshCookie) return null
+                access_token = accessCookie.split('=')[1]
+                refresh_token = refreshCookie.split('=')[1]
+                access_token_expirationDate =  koa.request.headers.cookie.split(';').find((c) => c.trim().startsWith('album_access_token_expirationDate=')).split('=')[1]
+                refresh_token_expirationDate =  koa.request.headers.cookie.split(';').find((c) => c.trim().startsWith('album_refresh_token_expirationDate=')).split('=')[1]
+            }
+            
+            if (new Date().getTime() > Number.parseInt(access_token_expirationDate) || !access_token) return new ForbiddenError('Your session expired. Sign in again.')
+            
+            if(access_token) {
+                let me = jwt.verify(access_token, process.env.SECRET)
                 return await koa.model('User').findById(me.uid)
-            } else return new ForbiddenError('Your session expired. Sign in again.')
+            }
         } catch (error) {
             console.log("This is getMe error", error)
         }
@@ -106,11 +123,6 @@ module.exports = {
             let user = await koa.model('User').find({ email: find_code[0].email })
             let access_token = { access_token: jwt.sign({ uid: user[0]._id }, process.env.SECRET, { expiresIn: '15min' }) }
             let refresh_token = { refresh_token: jwt.sign({ uid: user[0]._id }, process.env.SECRET, { expiresIn: '7d' }) }
-
-            koa.cookies.set('access_token', access_token.access_token)
-
-            koa.cookies.set('refresh_token', refresh_token.refresh_token)
-
             return Object.assign(user[0], access_token, refresh_token)
         } catch(error) {
             console.log("This is login error", error)
