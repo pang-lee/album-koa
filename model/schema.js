@@ -6,7 +6,7 @@ module.exports = {
                 email:{ type: String },
                 password:{ type: String },
                 username:{ type: String },
-                username:{ type: String }
+                count:{ type: Number, default: 0 }
             },
             { collection: 'User' }
         )

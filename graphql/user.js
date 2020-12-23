@@ -29,7 +29,6 @@ const typeDefs = gql`
     }
 
     type login{
-        id: ID!
         access_token: String!
         refresh_token: String!
     }
@@ -45,6 +44,7 @@ const typeDefs = gql`
         login(code: String!): login
         signup(code: String!): signup
         forget(email: String!): String
+        invalidateToken: Boolean!
     }
 `
 
@@ -59,6 +59,7 @@ const resolvers = {
         login: userController.logIn,
         signup: userController.signUp,
         forget: userController.forget,
+        invalidateToken: userController.invalidateToken
     }
 }
 
