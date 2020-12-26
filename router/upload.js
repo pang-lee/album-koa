@@ -1,21 +1,18 @@
 const router = require('koa-router')()
 
 router.get('/', async(ctx, next) =>{
-    console.log('trigger', ctx.uid)
-    if(ctx.uid){
+    if(ctx.uid) {
         try {
-            console.log('exec here')
             const user = await ctx.model('User').findById(ctx.uid)
-            console.log('this is find user', user)
-            return user.avatar
+            return ctx.body = user.avatar
         } catch (error) {
             console.log("get img error", error)
         }
     }
-    return null
+    next()
 })
 
-router.post('/', async(ctx, next) =>{
+router.post('/avatar', async(ctx, next) =>{
     if(ctx.uid) {
         try {
             await ctx.req.addListener('data', async (data) => {
@@ -26,7 +23,7 @@ router.post('/', async(ctx, next) =>{
             console.log('upload error', error)
         }
     }
-    return null
+    next()
 })
 
 module.exports = router
