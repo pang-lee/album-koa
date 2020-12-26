@@ -1,12 +1,15 @@
 const { ForbiddenError } = require('apollo-server-koa')
 const helpers = require('../helpers/helper')
 const { v4: uuidv4 } = require('uuid')
-const jwt = require('jsonwebtoken')
 const bcrypt = require('bcrypt')
 
 module.exports = {
-    getAll: async (_, args, { koa }) => await koa.model('User').find(),
-    getMe: async (_, args, { koa }) => {
+    getAll: async (_, __, { koa }) => await koa.model('User').find(),
+    getRefresh: async(_, __, { koa }) => {
+        const { accessToken } = helpers.generate_token(koa.uid)
+        return { access_token: accessToken, access_token_expirationDate: new Date().getTime() + 1000 * 60 * 60 }
+    },
+    getMe: async (_, __, { koa }) => {
         try {
             if(!koa.uid) return new ForbiddenError('Your session expired. Sign in again.')
             return koa.model('User').findById(koa.uid)
@@ -21,8 +24,7 @@ module.exports = {
             const user = await koa.model('User').findById(koa.uid)
 
             if(!user) return new ForbiddenError('User Not Found!')
-            let plus = user.count + 1
-            await koa.model('User').findByIdAndUpdate(koa.uid, { count: plus }, { useFindAndModify: false })
+            await koa.model('User').findByIdAndUpdate(koa.uid, { count: user.count + 1 }, { useFindAndModify: false })
             return true
         } catch (error) {
             console.log("invalidateToken error", error)
@@ -67,10 +69,9 @@ module.exports = {
             let find_code = await koa.model('SignUpCode').find({ verify_code: code })
             if(find_code.length == 0) return new ForbiddenError('Code Not Found Or Typo')
             await koa.model('SignUpCode').deleteOne({ verify_code: find_code[0].verify_code, id: find_code[0].id, email: find_code[0].email, password: find_code[0].password, username: find_code[0].username })
-            let create = await koa.model('User').create({ id: find_code[0].id, email: find_code[0].email, password: find_code[0].password, username: find_code[0].username})
-            let access_token = { access_token: jwt.sign({ uid: find_code[0]._id }, process.env.ACCESS_TOKEN_SECRET, { expiresIn: '15s' }) }
-            let refresh_token = { refresh_token: jwt.sign({ uid: find_code[0]._id }, process.env.REFRESH_TOKEN_SECRET, { expiresIn: '7d' }) }
-            return Object.assign(create, access_token, refresh_token)
+            let create = await koa.model('User').create({ id: find_code[0].id, email: find_code[0].email, password: find_code[0].password, username: find_code[0].username, count:0 })
+            const { accessToken, refreshToken } = helpers.generate_token(create)
+            return { access_token: accessToken, access_token_expirationDate: new Date().getTime() + 1000 * 60 * 60, refresh_token: refreshToken, refresh_token_expirationDate: new Date().getTime() + 1000 * 60 * 60 * 24 * 14}
         } catch(error) {
             console.log("This is signUp error", error)
         }
@@ -103,7 +104,7 @@ module.exports = {
             await koa.model('LogInCode').create({ verify_code: random_code, email: input.email })
             setTimeout(async ()=>{
                 await koa.model('LogInCode').deleteOne({ verify_code: random_code })
-            }, 1000*60*2 )
+            }, 1000 * 60 * 2 )
             return random_code
         } catch(error) {
             console.log("This is verify_login error", error)
@@ -115,16 +116,8 @@ module.exports = {
             if(find_code.length == 0) return new ForbiddenError('Code Not Found Or Typo')
             await koa.model('LogInCode').deleteOne({ verify_code: find_code[0].verify_code, email: find_code[0].email })
             let user = await koa.model('User').find({ email: find_code[0].email })
-
-            // let access_token = { access_token: jwt.sign({ uid: user[0]._id }, process.env.ACCESS_TOKEN_SECRET, { expiresIn: '15min' }) }
-            // let refresh_token = { refresh_token: jwt.sign({ uid: user[0]._id, count: user[0].count }, process.env.REFRESH_TOKEN_SECRET, { expiresIn: '7d' }) }
-
             const { accessToken, refreshToken } = helpers.generate_token(user[0])
-            koa.cookies.set('a', accessToken)
-            koa.cookies.set('b', refreshToken)
-            
-            return { access_token: accessToken, refresh_token: refreshToken }
-            // return Object.assign(user[0], access_token, refresh_token)
+            return { access_token: accessToken, access_token_expirationDate: new Date().getTime() + 1000 * 60 * 60, refresh_token: refreshToken, refresh_token_expirationDate: new Date().getTime() + 1000 * 60 * 60 * 24 * 14}
         } catch(error) {
             console.log("This is login error", error)
         }

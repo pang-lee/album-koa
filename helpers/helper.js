@@ -3,13 +3,13 @@ const { sign } = require('jsonwebtoken')
 module.exports = {
     generate: () => {
         let code = ''
-        for(let i= 0;i<6;i++){
+        for(let i= 0; i<6; i++){
             code += parseInt(Math.random()*10)
         }
         return code
     },
     forget: () => {
-        let random_number = Math.floor(Math.random()*99999)
+        let random_number = Math.floor(Math.random() * 99999)
         let text = ''
         let possible = "abcdefghijklmnopqrstuvwxyz"
 
@@ -17,8 +17,8 @@ module.exports = {
         return text + random_number
     },
     generate_token: (user) => {
-        const accessToken = sign({uid: user._id }, process.env.ACCESS_TOKEN_SECRET, { expiresIn: '15s' })
-        const refreshToken = sign({ uid: user._id, count: user.count }, process.env.REFRESH_TOKEN_SECRET, { expiresIn: '7d' })
+        const accessToken = sign({uid: user._id }, process.env.ACCESS_TOKEN_SECRET, { expiresIn: '1hrs' })
+        const refreshToken = sign({ uid: user._id, count: user.count }, process.env.REFRESH_TOKEN_SECRET, { expiresIn: '14d' })
         return { accessToken, refreshToken }
     }
 }

@@ -14,35 +14,30 @@ const typeDefs = gql`
     }
 
     type user{
-        email: String
-        password: String
-        username: String
-    }
-
-    type signup{
         id: ID!
         username: String!
-        email: String!
-        password: String!
-        access_token: String!
-        refresh_token: String!
+        gender: String
+        birthday: String
     }
 
-    type login{
-        access_token: String!
-        refresh_token: String!
+    type token{
+        access_token: String
+        access_token_expirationDate: String
+        refresh_token: String
+        refresh_token_expirationDate: String
     }
 
     extend type Query {
         getUsers: [user]
-        getMe: user
+        getMe: user,
+        getRefresh: token
     }
 
     extend type Mutation {
         verify_login(input: loginInput!): String
+        login(code: String!): token
         verify_signup(input: signupInput!): String
-        login(code: String!): login
-        signup(code: String!): signup
+        signup(code: String!): token
         forget(email: String!): String
         invalidateToken: Boolean!
     }
@@ -51,7 +46,8 @@ const typeDefs = gql`
 const resolvers = {
     Query: {
         getUsers: userController.getAll,
-        getMe: userController.getMe
+        getMe: userController.getMe,
+        getRefresh: userController.getRefresh
     },
     Mutation: {
         verify_login: userController.verify_login,
