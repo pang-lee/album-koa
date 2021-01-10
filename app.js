@@ -11,6 +11,7 @@ const schema = require('./model/schema')
 const nodemailer = require('nodemailer')
 const smtpTransport = require('nodemailer-smtp-transport')
 const { verify } = require('jsonwebtoken')
+const override = require('koa-override')
 
 app.use(jwt({ secret: process.env.KOASECRET }).unless({ path: [/^\/graphql/, /^\/upload/] }))
 
@@ -22,11 +23,11 @@ app.use(cors({
 }))
 
 app.use(mongoose({
-  host: 'localhost',
-  port: '27017',
+  host: process.env.DBHOST,
+  port: process.env.DBPORT,
   user: '',
   pass: '',
-  db: 'koa',
+  db: process.env.DB,
   mongoOptions: {
     useNewUrlParser: true,
     useCreateIndex: true,
@@ -115,6 +116,7 @@ app.listen({ port: 4000 }, () => console.log(`🚀 Server ready at http://localh
 
 const bodyParser = require('koa-bodyparser')
 app.use(bodyParser())
+app.use(override())
 
 const router = require('./router/index')
 app.use(router.routes(), router.allowedMethods())
