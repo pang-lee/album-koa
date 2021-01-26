@@ -32,6 +32,7 @@ app.use(mongoose({
     useNewUrlParser: true,
     useCreateIndex: true,
     useUnifiedTopology: true,
+    useFindAndModify: false,
     reconnectTries: null,
     reconnectInterval: null,
     poolSize: 10,

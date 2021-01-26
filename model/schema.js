@@ -8,7 +8,9 @@ module.exports = {
                 username: { type: String },
                 count: { type: Number, default: 0 },
                 gender: { type: String, default: '' },
-                birthday: { type: String, default: new Date().toISOString().substr(0, 10) }
+                birthday: { type: String, default: new Date().toISOString().substr(0, 10) },
+                avatar: { type: String, default: '' },
+                background: { type: String, default: '' }
             },
             { collection: 'User' }
         )
