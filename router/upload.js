@@ -11,7 +11,7 @@ const storage = new GridFsStorage({
         try {
             const crypto = await GridFsStorage.generateBytes()
             const filename = crypto.filename + Date.now() + path.extname(file.originalname)
-            req.headers.field = file.fieldname + '_' + filename
+            req.headers.field = filename
             return {
                 filename: filename,
                 bucketName: 'Uploads'
@@ -29,6 +29,7 @@ router.get('/avatar', async(ctx, next) =>{
     try {
         if(ctx.uid){
             let user = await ctx.model('User').findById(ctx.uid)
+            if(user.avatar == '') return ctx.body = ''
             let img = await ctx.gridFS.findOne(user.avatar)
             let mimeType = mime.lookup(img.contentType)
             let avatar = await ctx.gridFS.readFileStream(img._id)
@@ -37,7 +38,6 @@ router.get('/avatar', async(ctx, next) =>{
             ctx.body = avatar
             next()
         }
-
     } catch (error) {
         console.log('This is get avatar', error)
         next()
@@ -53,7 +53,12 @@ router.get('/avatar', async(ctx, next) =>{
 
 router.post('/avatar', upload.single('avatar'), async(ctx, next) => {
     try {
-        let user = await ctx.model('User').findByIdAndUpdate(ctx.uid, { avatar: ctx.request.header.field })
+        let user = await ctx.model('User').findById(ctx.uid)
+        if(user.avatar !== ''){
+            let old = await ctx.gridFS.findOne(user.avatar)
+            await ctx.gridFS.delete(old._id)
+        } else await ctx.model('User').findByIdAndUpdate(ctx.uid, { avatar: ctx.request.header.field })
+        await ctx.model('User').findByIdAndUpdate(ctx.uid, { avatar: ctx.request.header.field })
         let img = await ctx.gridFS.findOne(user.avatar)
         let mimeType = mime.lookup(img.contentType)
         let avatar = await ctx.gridFS.readFileStream(img._id)
