@@ -1,4 +1,6 @@
 const { sign } = require('jsonwebtoken')
+const GridFsStorage = require('multer-gridfs-storage')
+const path = require('path')
 
 module.exports = {
     generate: () => {
@@ -20,5 +22,23 @@ module.exports = {
         const accessToken = sign({uid: user._id }, process.env.ACCESS_TOKEN_SECRET, { expiresIn: '1hrs' })
         const refreshToken = sign({ uid: user._id, count: user.count }, process.env.REFRESH_TOKEN_SECRET, { expiresIn: '14d' })
         return { accessToken, refreshToken }
-    }
+    },
+    storage: new GridFsStorage({
+        url: `mongodb://${process.env.DBHOST}:${process.env.DBPORT}/${process.env.DB}`,
+        options: { useNewUrlParser: true, useUnifiedTopology: true },
+        file: async (req, file) => {
+            try {
+                const crypto = await GridFsStorage.generateBytes()
+                const filename = file.fieldname + '_' + crypto.filename + Date.now() + path.extname(file.originalname)
+                req.headers.field = filename
+                return {
+                    filename: filename,
+                    bucketName: 'Uploads'
+                }
+            } catch (error) {
+                console.log('helper upload error', error)
+                return new Error('Upload Failed With Some Error')
+            }
+        }
+    })
 }
