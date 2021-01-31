@@ -14,7 +14,7 @@ module.exports = {
             if(!koa.uid) return new ForbiddenError('Your session expired. Sign in again.')
             return koa.model('User').findById(koa.uid)
         } catch (error) {
-            console.log("This is getMe error", error)
+            console.log('This is getMe error', error)
         }
     },
     invalidateToken: async (_, __, { koa }) => {
@@ -27,7 +27,7 @@ module.exports = {
             await koa.model('User').findByIdAndUpdate(koa.uid, { count: user.count + 1 }, { useFindAndModify: false })
             return true
         } catch (error) {
-            console.log("invalidateToken error", error)
+            console.log('invalidateToken error', error)
         }
     },
     verify_signup: async(_, { input }, { koa, mailer }) => {
@@ -61,7 +61,7 @@ module.exports = {
             }, 1000*60*2 )
             return random_code
         } catch (error) {
-            console.log("This is verify_signup mailer error", error)
+            console.log('This is verify_signup mailer error', error)
         }
     },
     signUp: async (_, { code }, { koa }) => {
@@ -73,7 +73,7 @@ module.exports = {
             const { accessToken, refreshToken } = helpers.generate_token(create)
             return { access_token: accessToken, access_token_expirationDate: new Date().getTime() + 1000 * 60 * 60, refresh_token: refreshToken, refresh_token_expirationDate: new Date().getTime() + 1000 * 60 * 60 * 24 * 14}
         } catch(error) {
-            console.log("This is signUp error", error)
+            console.log('This is signUp error', error)
         }
     },
     verify_login: async (_, { input }, { koa, mailer }) => {
@@ -107,7 +107,7 @@ module.exports = {
             }, 1000 * 60 * 2 )
             return random_code
         } catch(error) {
-            console.log("This is verify_login error", error)
+            console.log('This is verify_login error', error)
         }
     },
     logIn: async (_,  { code }, { koa }) => {
@@ -119,7 +119,7 @@ module.exports = {
             const { accessToken, refreshToken } = helpers.generate_token(user[0])
             return { access_token: accessToken, access_token_expirationDate: new Date().getTime() + 1000 * 60 * 60, refresh_token: refreshToken, refresh_token_expirationDate: new Date().getTime() + 1000 * 60 * 60 * 24 * 14}
         } catch(error) {
-            console.log("This is login error", error)
+            console.log('This is login error', error)
         }
     },
     forget: async(_, { email }, { koa, mailer }) => {
@@ -138,7 +138,7 @@ module.exports = {
                 `
             }, (error, info) => {
                 if (error) {
-                    console.log("This is forget mailer error", error)
+                    console.log('This is forget mailer error', error)
                     transporter.close()
                 } else {     
                     console.log('Email sent: ' + info.response)
@@ -149,6 +149,43 @@ module.exports = {
             return encrypt
         } catch (error) {
             console.log("This is forget error", error)
+        }
+    },
+    set_username: async(_, { name }, { koa }) => {
+        try {
+            if(!koa.uid) return new ForbiddenError('Your session expired. Sign in again.')
+            await koa.model('User').findByIdAndUpdate(koa.uid, { username: name })
+            return 'Your Username Have Been Changed!'
+        } catch (error) {
+            return console.log('This is set username error', error)
+        }
+    },
+    set_gender: async(_, { gender }, { koa }) => {
+        try {
+            if(!koa.uid) return new ForbiddenError('Your session expired. Sign in again.')
+            await koa.model('User').findByIdAndUpdate(koa.uid, { gender: gender })
+            return 'Your Gender Have Benn Changed!'
+        } catch (error) {
+            return console.log('This is set gender error', error)
+        }
+    },
+    set_date: async(_, { date }, { koa }) => {
+        try {
+            if(!koa.uid) return new ForbiddenError('Your session expired. Sign in again.')
+            await koa.model('User').findByIdAndUpdate(koa.uid, { birthday: date })
+            return 'Your Birthday Have Benn Changed!'
+        } catch (error) {
+            return console.log('This is set date error', error)
+        }
+    },
+    set_password: async(_, { password }, { koa }) => {
+        try {
+            if(!koa.uid) return new ForbiddenError('Your session expired. Sign in again.')
+            let encrypt = await bcrypt.hash(password, Number(process.env.SALT_ROUNDS))
+            await koa.model('User').findByIdAndUpdate(koa.uid, { password: encrypt })
+            return 'Your Password Have Been Changed!'
+        } catch (error) {
+            return console.log('This is set password', error)
         }
     }
 }

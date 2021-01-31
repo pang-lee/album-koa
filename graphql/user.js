@@ -40,6 +40,10 @@ const typeDefs = gql`
         signup(code: String!): token
         forget(email: String!): String
         invalidateToken: Boolean!
+        set_username(name: String!): String
+        set_gender(gender: String!): String
+        set_date(date: String!): String
+        set_password(password: String!): String
     }
 `
 
@@ -55,7 +59,11 @@ const resolvers = {
         login: userController.logIn,
         signup: userController.signUp,
         forget: userController.forget,
-        invalidateToken: userController.invalidateToken
+        invalidateToken: userController.invalidateToken,
+        set_username: userController.set_username,
+        set_gender: userController.set_gender,
+        set_date: userController.set_date,
+        set_password: userController.set_password
     }
 }
 
