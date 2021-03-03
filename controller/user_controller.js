@@ -83,6 +83,7 @@ module.exports = {
             let passwordCompare = await bcrypt.compare(input.password, user[0].password)
             if(!passwordCompare) return new ForbiddenError('Password Not Same')
             let random_code = helpers.generate()
+            console.log("This is user controller verify login CODE NUM", random_code)
             await mailer.sendMail({
                 from: 'leepang8834@gmail.com.tw',
                 to: input.email,
