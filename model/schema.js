@@ -15,6 +15,15 @@ module.exports = {
             { collection: 'User' }
         )
     },
+    Book: ({ Schema }) => {
+        return new Schema(
+            {
+                books: { type: Array, default: [] },
+                id: { type: String }
+            },
+            { collection: 'Book' }
+        )
+    },
     SignUpCode: ({ Schema }) => {
         return new Schema(
             {

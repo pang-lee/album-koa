@@ -6,8 +6,12 @@ const bcrypt = require('bcrypt')
 module.exports = {
     getAll: async (_, __, { koa }) => await koa.model('User').find(),
     getRefresh: async(_, __, { koa }) => {
-        const { accessToken } = helpers.generate_token(koa.uid)
-        return { access_token: accessToken, access_token_expirationDate: new Date().getTime() + 1000 * 60 * 60 }
+        try {
+            const { accessToken } = helpers.generate_token(koa.uid)
+            return { access_token: accessToken, access_token_expirationDate: new Date().getTime() + 1000 * 60 * 60 }
+        } catch (error) {
+            console.log('This is get refresh error', error)
+        }
     },
     getMe: async (_, __, { koa }) => {
         try {

@@ -20,7 +20,7 @@
   "dependencies": {
     "@koa/multer": "^3.0.0",
     "@south-paw/koa-mongoose": "^1.1.0",
-    "apollo-server-koa": "^2.21.0",
+    "apollo-server-koa": "^2.22.2",
     "bcrypt": "^5.0.1",
     "dotenv": "^8.2.0",
     "graphql": "^15.5.0",
@@ -28,12 +28,12 @@
     "koa": "^2.13.1",
     "koa-bodyparser": "^4.3.0",
     "koa-compress": "^5.0.1",
-    "koa-jwt": "^4.0.0",
+    "koa-jwt": "^4.0.1",
     "koa-override": "^3.0.0",
     "koa-router": "^10.0.0",
     "koa-static": "^5.0.0",
     "koa2-cors": "^2.0.6",
-    "mime-types": "^2.1.29",
+    "mime-types": "^2.1.30",
     "mongo-gridfs": "^1.1.0",
     "multer": "^1.4.2",
     "multer-gridfs-storage": "^4.2.0",
@@ -42,8 +42,8 @@
     "uuid": "^8.3.2"
   },
   "devDependencies": {
-    "@types/node": "^14.14.31",
-    "apidoc": "^0.26.0",
+    "@types/node": "^14.14.37",
+    "apidoc": "^0.27.1",
     "nodemon": "^2.0.7"
   },
   "bugs": {
