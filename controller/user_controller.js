@@ -16,7 +16,7 @@ module.exports = {
     getMe: async (_, __, { koa }) => {
         try {
             if(!koa.uid) return new ForbiddenError('Your session expired. Sign in again.')
-            return koa.model('User').findById(koa.uid)
+            return await koa.model('User').findById(koa.uid)
         } catch (error) {
             console.log('This is getMe error', error)
         }
@@ -190,7 +190,29 @@ module.exports = {
             await koa.model('User').findByIdAndUpdate(koa.uid, { password: encrypt })
             return 'Your Password Have Been Changed!'
         } catch (error) {
-            return console.log('This is set password', error)
+            return console.log('This is set password error', error)
+        }
+    },
+    set_privacy: async(_, { privacy_value }, { koa }) => {
+        try {
+            if(!koa.uid) return new ForbiddenError('Your Session expired. Sign in again.')
+            let theSharePrivacy = JSON.parse(privacy_value)
+            await koa.model('User').updateOne({ privacy: theSharePrivacy.privacy })
+            let user = await koa.model('Book').findOne({ id: theSharePrivacy.userId })
+            switch (theSharePrivacy.book_share) {
+                case false:
+                    user.books.forEach(async (element) => await koa.model('Book').updateOne({ "books": { $elemMatch:{ _id: element._id }}}, { $set: { "books.$.share": theSharePrivacy.book_share }}))
+                    break
+                case true:
+                    user.books.forEach(async (element) => await koa.model('Book').updateOne({ "books": { $elemMatch:{ _id: element._id }}}, { $set: { "books.$.share": theSharePrivacy.book_share }}))
+                    break
+                default:
+                    user.books.forEach(async (element, index) => await koa.model('Book').updateOne({ "books": { $elemMatch:{ _id: element._id }}}, { $set: { "books.$.share": theSharePrivacy.book_share[index] }}))
+                    break
+            }
+            return true
+        } catch (error) {
+            console.log('This is set privacy error', error)
         }
     }
 }

@@ -35,7 +35,7 @@ const typeDefs = gql`
   }
 
   extend type Mutation{
-    set_book(userId: ID!, bookId: ID!, total_page: Int!, share: Boolean!, booktitle: String!, bookinfo: String): Book
+    set_book(userId: ID!, bookId: ID!, total_page: Int!, share: Boolean!, booktitle: String!, bookinfo: String): Boolean
   }
 `
 

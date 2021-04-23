@@ -18,6 +18,7 @@ const typeDefs = gql`
         username: String!
         gender: String
         birthday: String
+        privacy: String
     }
 
     type token{
@@ -30,7 +31,8 @@ const typeDefs = gql`
     extend type Query {
         getUsers: [user]
         getMe: user,
-        getRefresh: token
+        getRefresh: token,
+        getprivate: String
     }
 
     extend type Mutation {
@@ -44,6 +46,7 @@ const typeDefs = gql`
         set_gender(gender: String!): String
         set_date(date: String!): String
         set_password(password: String!): String
+        set_privacy(privacy_value: String!): Boolean
     }
 `
 
@@ -63,7 +66,8 @@ const resolvers = {
         set_username: userController.set_username,
         set_gender: userController.set_gender,
         set_date: userController.set_date,
-        set_password: userController.set_password
+        set_password: userController.set_password,
+        set_privacy: userController.set_privacy
     }
 }
 

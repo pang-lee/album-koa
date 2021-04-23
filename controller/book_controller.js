@@ -1,5 +1,3 @@
-const { findWithAttr } = require('../helpers/helper')
-
 module.exports = {
     getAllBook: async (_, __, { koa }) => {
         try {
@@ -33,9 +31,7 @@ module.exports = {
                     }
                 })
             }
-            let which_user = await koa.model('Book').findOne({ id: userId })
-            let which_book = findWithAttr(which_user.books, 'id', bookId)
-            return which_user.books[which_book]
+            return true
         } catch (error) {
             console.log('This is set book error', error)
         }
