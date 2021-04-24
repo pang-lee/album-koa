@@ -31,7 +31,8 @@ const typeDefs = gql`
   }
 
   extend type Query {
-    books: [Book]
+    books: [Book],
+    guestBook(userId: String!, bookId: String!): Book
   }
 
   extend type Mutation{
@@ -43,7 +44,8 @@ const resolvers = {
   photoFilter: scalar_type.photoFilter,
   bookOption: scalar_type.bookOption,
   Query: {
-    books: bookController.getAllBook
+    books: bookController.getAllBook,
+    guestBook: bookController.getGuestBook,
   },
   Mutation: {
     set_book: bookController.setBook
