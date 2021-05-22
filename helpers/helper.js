@@ -40,5 +40,20 @@ module.exports = {
                 return new Error('Upload Failed With Some Error')
             }
         }
-    })
+    }),
+    readableStream: (readable) => {
+        return new Promise((resolve, reject) => {
+            let buffs = []
+            readable.on('data', (chunks) => {
+                buffs.push(chunks)
+            })
+            readable.on('end', () => {
+                let fbuf = Buffer.concat(buffs)
+                resolve(fbuf.toString('base64'))
+            })
+            readable.on('error', (error) => {
+                reject(error)
+            })
+        })
+    }
 }
