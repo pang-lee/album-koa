@@ -74,6 +74,7 @@ module.exports = {
             if(find_code.length == 0) return new ForbiddenError('Code Not Found Or Typo')
             await koa.model('SignUpCode').deleteOne({ verify_code: find_code[0].verify_code, id: find_code[0].id, email: find_code[0].email, password: find_code[0].password, username: find_code[0].username })
             let create = await koa.model('User').create({ id: find_code[0].id, email: find_code[0].email, password: find_code[0].password, username: find_code[0].username, count:0 })
+            await koa.model('Book').create({ id: find_code[0].id, books: [] })
             const { accessToken, refreshToken } = helpers.generate_token(create)
             return { access_token: accessToken, access_token_expirationDate: new Date().getTime() + 1000 * 60 * 60, refresh_token: refreshToken, refresh_token_expirationDate: new Date().getTime() + 1000 * 60 * 60 * 24 * 14}
         } catch(error) {
