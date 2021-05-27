@@ -66,7 +66,6 @@ router.get('/bookImg', async(ctx, next) => {
     }
 })
 
-// vue-core-image-upload API pass
 router.post('/bookImg', upload.single('bookImg'), async(ctx, next) =>{
     try {
         if(ctx.uid) return ctx.body = ctx.request.header.field

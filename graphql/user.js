@@ -28,6 +28,16 @@ const typeDefs = gql`
         refresh_token_expirationDate: String
     }
 
+    type social_login{
+        access_token: String
+        id: ID!
+        avatar: String
+        username: String!
+        gender: String
+        birthday: String
+        privacy: String
+    }
+
     extend type Query {
         getUsers: [user]
         getMe: user,
@@ -47,6 +57,7 @@ const typeDefs = gql`
         set_date(date: String!): String
         set_password(password: String!): String
         set_privacy(privacy_value: String!): Boolean
+        google_login(googleUser: String!): social_login
     }
 `
 
@@ -67,7 +78,8 @@ const resolvers = {
         set_gender: userController.set_gender,
         set_date: userController.set_date,
         set_password: userController.set_password,
-        set_privacy: userController.set_privacy
+        set_privacy: userController.set_privacy,
+        google_login: userController.google_login
     }
 }
 

@@ -10,8 +10,8 @@ module.exports = {
                 gender: { type: String, default: '' },
                 birthday: { type: String, default: new Date().toISOString().substr(0, 10) },
                 avatar: { type: String, default: '' },
-                privacy: { type: String, default: 'Share All' }
-                // background: { type: String, default: '' }
+                privacy: { type: String, default: 'Share All' },
+                regsiterwith: { type: String, default: '' }
             },
             { collection: 'User' }
         )

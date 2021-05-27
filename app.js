@@ -53,24 +53,41 @@ app.use(mongoose({
 
 app.use(async(ctx, next) => {
   if (!ctx.req.headers.cookie) return next()
-  
+
   let accessToken
   let refreshToken
-  
+
+  let provider = ctx.req.headers.cookie.split(';').find((c) => c.trim().startsWith('Idp='))
+
   let accessCookie = ctx.req.headers.cookie.split(';').find((c) => c.trim().startsWith('album_access_token='))
   if(accessCookie) accessToken = accessCookie.split('=')[1]
-  
-  let refreshCookie = ctx.req.headers.cookie.split(';').find((c) => c.trim().startsWith('album_refresh_token='))
-  refreshToken = refreshCookie.split('=')[1]
+
+  if(!provider){
+    let accessCookie = ctx.req.headers.cookie.split(';').find((c) => c.trim().startsWith('album_access_token='))
+    if(accessCookie) accessToken = accessCookie.split('=')[1]
+    let refreshCookie = ctx.req.headers.cookie.split(';').find((c) => c.trim().startsWith('album_refresh_token='))
+    if(refreshCookie) refreshToken = refreshCookie.split('=')[1]
+  }
 
   if(!accessToken && !refreshToken) return next()
 
   if(accessToken){
     try {
-      const data = verify(accessToken, process.env.ACCESS_TOKEN_SECRET)
-      ctx.uid = data.uid
+      if(!provider){
+        const data = verify(accessToken, process.env.ACCESS_TOKEN_SECRET)
+        ctx.uid = data.uid
+        return next()
+      }
+
+      let expired_cookies = ctx.req.headers.cookie.split(';').find((c) => c.trim().startsWith('google_expirationDate='))
+      ctx.provider_token_expired = expired_cookies.split('=')[1]
+      let { uid } = verify(accessToken, process.env.ACCESS_TOKEN_SECRET)
+      ctx.uid = uid
+
       return next()
-    } catch (error) {}
+    } catch {
+      return next()
+    }
   }
 
   if (!refreshToken) return next()

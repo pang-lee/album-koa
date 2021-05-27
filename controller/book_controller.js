@@ -12,8 +12,9 @@ module.exports = {
     setBook: async(_, { userId, bookId, total_page, share, booktitle, bookinfo }, { koa }) => {
         try {
             let user = await koa.model('Book').findOne({ id: userId })
-            let book_exist = user.books.findIndex((element) => element.id === bookId)
-            if(book_exist) {
+            let book_exist = user.books.some((element) => { return element.id == bookId })
+
+            if(!book_exist) {
                 await koa.model('Book').updateMany({ id: userId }, {
                     $push: {
                         books: {

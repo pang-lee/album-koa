@@ -1,6 +1,7 @@
 const { ForbiddenError } = require('apollo-server-koa')
 const helpers = require('../helpers/helper')
 const { v4: uuidv4 } = require('uuid')
+const { decode } = require('jsonwebtoken')
 const bcrypt = require('bcrypt')
 
 module.exports = {
@@ -73,7 +74,7 @@ module.exports = {
             let find_code = await koa.model('SignUpCode').find({ verify_code: code })
             if(find_code.length == 0) return new ForbiddenError('Code Not Found Or Typo')
             await koa.model('SignUpCode').deleteOne({ verify_code: find_code[0].verify_code, id: find_code[0].id, email: find_code[0].email, password: find_code[0].password, username: find_code[0].username })
-            let create = await koa.model('User').create({ id: find_code[0].id, email: find_code[0].email, password: find_code[0].password, username: find_code[0].username, count:0 })
+            let create = await koa.model('User').create({ id: find_code[0].id, email: find_code[0].email, password: find_code[0].password, username: find_code[0].username, count:0, regsiterwith: 'email' })
             await koa.model('Book').create({ id: find_code[0].id, books: [] })
             const { accessToken, refreshToken } = helpers.generate_token(create)
             return { access_token: accessToken, access_token_expirationDate: new Date().getTime() + 1000 * 60 * 60, refresh_token: refreshToken, refresh_token_expirationDate: new Date().getTime() + 1000 * 60 * 60 * 24 * 14}
@@ -214,6 +215,24 @@ module.exports = {
             return true
         } catch (error) {
             console.log('This is set privacy error', error)
+        }
+    },
+    google_login: async(_, { googleUser }, { koa }) => {
+        try {
+            if(new Date().getTime() > Number.parseInt(koa.provider_token_expired)) return new ForbiddenError('Your session expired. Sign in again.')
+            let user_from_google = decode(googleUser)
+            let user = await koa.model('User').find({ email: user_from_google.email })
+            if(user.length == 0){
+                let userId = uuidv4()
+                let create = await koa.model('User').create({ id: userId, email: user_from_google.email, username: user_from_google.family_name + ' ' + user_from_google.given_name, avatar: user_from_google.picture, regsiterwith: user_from_google.iss })
+                await koa.model('Book').create({ id: userId, books: [] })
+                const { accessToken } = helpers.generate_token(create)
+                return { access_token: accessToken, id: create.id, avatar: create.avatar, username: create.username, gender: create.gender, birthday: create.birthday, privacy: create.privacy }
+            }
+            const { accessToken } = helpers.generate_token(user[0])
+            return { access_token: accessToken, id: user[0].id, avatar: user[0].avatar, username: user[0].username, gender: user[0].gender, birthday: user[0].birthday, privacy: user[0].privacy }
+        } catch (error) {
+            console.log('This is google login error', error)
         }
     }
 }
