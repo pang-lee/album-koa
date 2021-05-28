@@ -10,7 +10,7 @@ module.exports = {
                 gender: { type: String, default: '' },
                 birthday: { type: String, default: new Date().toISOString().substr(0, 10) },
                 avatar: { type: String, default: '' },
-                privacy: { type: String, default: 'Share All' },
+                privacy: { type: String, default: '全部分享' },
                 regsiterwith: { type: String, default: '' }
             },
             { collection: 'User' }
