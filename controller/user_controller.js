@@ -234,5 +234,23 @@ module.exports = {
         } catch (error) {
             console.log('This is google login error', error)
         }
+    },
+    facebook_login: async(_, { facebookUser }, { koa }) => {
+        try {
+            if(new Date().getTime() > Number.parseInt(koa.provider_token_expired)) return new ForbiddenError('Your session expired. Sign in again.')
+            let user_from_fb = JSON.parse(facebookUser)
+            let user = await koa.model('User').find({ email: user_from_fb.email })
+            if(user.length == 0){
+                let userId = uuidv4()
+                let create = await koa.model('User').create({ id: userId, email: user_from_fb.email, username: user_from_fb.first_name + ' ' + user_from_fb.middle_name + user_from_fb.given_name, avatar: user_from_fb.picture.data.url, regsiterwith: 'facebook' })
+                await koa.model('Book').create({ id: userId, books: [] })
+                const { accessToken } = helpers.generate_token(create)
+                return { access_token: accessToken, id: create.id, avatar: create.avatar, username: create.username, gender: create.gender, birthday: create.birthday, privacy: create.privacy }
+            }
+            const { accessToken } = helpers.generate_token(create)
+            return { access_token: accessToken, id: user[0].id, avatar: user[0].avatar, username: user[0].username, gender: user[0].gender, birthday: user[0].birthday, privacy: user[0].privacy }
+        } catch (error) {
+            console.log('This is facebook login error', error)
+        }
     }
 }

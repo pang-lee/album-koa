@@ -58,6 +58,7 @@ app.use(async(ctx, next) => {
   let refreshToken
 
   let provider = ctx.req.headers.cookie.split(';').find((c) => c.trim().startsWith('Idp='))
+  let brand = provider.split('=')[1]
 
   let accessCookie = ctx.req.headers.cookie.split(';').find((c) => c.trim().startsWith('album_access_token='))
   if(accessCookie) accessToken = accessCookie.split('=')[1]
@@ -78,8 +79,13 @@ app.use(async(ctx, next) => {
         ctx.uid = data.uid
         return next()
       }
-
-      let expired_cookies = ctx.req.headers.cookie.split(';').find((c) => c.trim().startsWith('google_expirationDate='))
+      
+      let expired_cookies
+      
+      if(brand == 'google') expired_cookies = ctx.req.headers.cookie.split(';').find((c) => c.trim().startsWith('google_expirationDate='))
+      
+      if(brand == 'facebook') expired_cookies = ctx.req.headers.cookie.split(';').find((c) => c.trim().startsWith('facebook_expirationDate='))
+      
       ctx.provider_token_expired = expired_cookies.split('=')[1]
       let { uid } = verify(accessToken, process.env.ACCESS_TOKEN_SECRET)
       ctx.uid = uid

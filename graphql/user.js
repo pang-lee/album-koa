@@ -58,6 +58,7 @@ const typeDefs = gql`
         set_password(password: String!): String
         set_privacy(privacy_value: String!): Boolean
         google_login(googleUser: String!): social_login
+        facebook_login(facebookUser: String!): social_login
     }
 `
 
@@ -79,7 +80,8 @@ const resolvers = {
         set_date: userController.set_date,
         set_password: userController.set_password,
         set_privacy: userController.set_privacy,
-        google_login: userController.google_login
+        google_login: userController.google_login,
+        facebook_login: userController.facebook_login
     }
 }
 
