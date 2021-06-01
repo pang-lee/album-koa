@@ -56,9 +56,10 @@ app.use(async(ctx, next) => {
 
   let accessToken
   let refreshToken
+  let brand
 
   let provider = ctx.req.headers.cookie.split(';').find((c) => c.trim().startsWith('Idp='))
-  let brand = provider.split('=')[1]
+  if(provider) brand = provider.split('=')[1]
 
   let accessCookie = ctx.req.headers.cookie.split(';').find((c) => c.trim().startsWith('album_access_token='))
   if(accessCookie) accessToken = accessCookie.split('=')[1]
