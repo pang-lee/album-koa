@@ -43,13 +43,13 @@ module.exports = {
             await mailer.sendMail({
                 from: 'leepang8834@gmail.com.tw',
                 to: input.email,
-                subject: 'Verify Your Identity',
+                subject: '驗證您的身分',
                 html: `
-                    <p>Hello! ${ input.username }</p>
-                    <p>Welcome You Join !!</p>
-                    <p>Your Verification Code Is：<strong style="color: #ff4e2a;">${random_code}</strong></p>
-                    <p>*** IT ONLY WORK WITHIN 2 MINUTES !! ***</p>
-                    <p>Thans For Your Registration</p>
+                    <p>您好! ${ input.username }</p>
+                    <p>歡迎您加入作品集 !!</p>
+                    <p>您的驗證碼是 ：<strong style="color: #ff4e2a;">${random_code}</strong></p>
+                    <p>*** 有效期間2分鐘 !! ***</p>
+                    <p>謝謝您註冊作品集，祝您有愉快的使用體驗</p>
                 `
             }, (error, info) => {
                 if (error) {
@@ -89,16 +89,15 @@ module.exports = {
             let passwordCompare = await bcrypt.compare(input.password, user[0].password)
             if(!passwordCompare) return new ForbiddenError('Password Not Same')
             let random_code = helpers.generate()
-            console.log("This is user controller verify login CODE NUM", random_code)
             await mailer.sendMail({
                 from: 'leepang8834@gmail.com.tw',
                 to: input.email,
-                subject: 'Verify Your Identity',
+                subject: '驗證您的身分',
                 html: `
-                    <p>Hello! ${ user[0].username }</p>
-                    <p>Welcome Back !!</p>
-                    <p>Your Verification Code Is：<strong style="color: #ff4e2a;">${ random_code }</strong></p>
-                    <p>*** IT ONLY WORK WITHIN 2 MINUTES !! ***</p>
+                    <p>您好! ${ user[0].username }</p>
+                    <p>歡迎您回來 !!</p>
+                    <p>您著驗證碼是 ：<strong style="color: #ff4e2a;">${ random_code }</strong></p>
+                    <p>*** 有效期間2分鐘 !! ***</p>
                 `
             }, (error, info) => {
                 if (error) {
