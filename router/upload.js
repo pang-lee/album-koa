@@ -1,6 +1,6 @@
 const router = require('koa-router')()
 const multer = require('@koa/multer')
-const { storage } = require('../helpers/helper')
+const { storage, readableStream } = require('../helpers/helper')
 const upload = multer({ storage })
 
 router.get('/avatar', async(ctx, next) =>{
