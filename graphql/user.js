@@ -13,9 +13,15 @@ const typeDefs = gql`
         password: String!
     }
 
+    input userNameInput {
+        name: String
+        nickname: String
+    }
+
     type user{
         id: ID!
         username: String!
+        nickname: String
         gender: String
         birthday: String
         privacy: String
@@ -52,7 +58,7 @@ const typeDefs = gql`
         signup(code: String!): token
         forget(email: String!): String
         invalidateToken: Boolean!
-        set_username(name: String!): String
+        set_username(input: userNameInput!): String
         set_gender(gender: String!): String
         set_date(date: String!): String
         set_password(password: String!): String

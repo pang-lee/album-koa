@@ -159,11 +159,12 @@ module.exports = {
             console.log("This is forget error", error)
         }
     },
-    set_username: async(_, { name }, { koa }) => {
+    set_username: async(_, { input }, { koa }) => {
         try {
             if(!koa.uid) return new ForbiddenError('Your session expired in set user. Sign in again.')
-            await koa.model('User').findByIdAndUpdate(koa.uid, { username: name })
-            return 'Your Username Have Been Changed!'
+            if(input.nickname) await koa.model('User').findByIdAndUpdate(koa.uid, { nickname: input.nickname })
+            await koa.model('User').findByIdAndUpdate(koa.uid, { username: input.name })
+            return '您的名字與暱稱更改成功囉 !'
         } catch (error) {
             return console.log('This is set username error', error)
         }
@@ -172,7 +173,7 @@ module.exports = {
         try {
             if(!koa.uid) return new ForbiddenError('Your session expired in set gender. Sign in again.')
             await koa.model('User').findByIdAndUpdate(koa.uid, { gender: gender })
-            return 'Your Gender Have Benn Changed!'
+            return '您的性別已經更改成功囉 !'
         } catch (error) {
             return console.log('This is set gender error', error)
         }
@@ -181,7 +182,7 @@ module.exports = {
         try {
             if(!koa.uid) return new ForbiddenError('Your session expired in set date. Sign in again.')
             await koa.model('User').findByIdAndUpdate(koa.uid, { birthday: date })
-            return 'Your Birthday Have Benn Changed!'
+            return '您的生日已經更改成功囉 !'
         } catch (error) {
             return console.log('This is set date error', error)
         }
@@ -191,7 +192,7 @@ module.exports = {
             if(!koa.uid) return new ForbiddenError('Your session expired in set password. Sign in again.')
             let encrypt = await bcrypt.hash(password, Number(process.env.SALT_ROUNDS))
             await koa.model('User').findByIdAndUpdate(koa.uid, { password: encrypt })
-            return 'Your Password Have Been Changed!'
+            return '您的密碼已經更改成功囉 !'
         } catch (error) {
             return console.log('This is set password error', error)
         }
