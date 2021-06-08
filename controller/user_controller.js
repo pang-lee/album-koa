@@ -162,6 +162,7 @@ module.exports = {
     set_username: async(_, { input }, { koa }) => {
         try {
             if(!koa.uid) return new ForbiddenError('Your session expired in set user. Sign in again.')
+            if(!input.name) return new ForbiddenError('Missing Somethings')
             if(input.nickname) await koa.model('User').findByIdAndUpdate(koa.uid, { nickname: input.nickname })
             await koa.model('User').findByIdAndUpdate(koa.uid, { username: input.name })
             return '您的名字與暱稱更改成功囉 !'
@@ -172,6 +173,7 @@ module.exports = {
     set_gender: async(_, { gender }, { koa }) => {
         try {
             if(!koa.uid) return new ForbiddenError('Your session expired in set gender. Sign in again.')
+            if(!gender) return new ForbiddenError('Missing Somethings')
             await koa.model('User').findByIdAndUpdate(koa.uid, { gender: gender })
             return '您的性別已經更改成功囉 !'
         } catch (error) {
@@ -181,6 +183,7 @@ module.exports = {
     set_date: async(_, { date }, { koa }) => {
         try {
             if(!koa.uid) return new ForbiddenError('Your session expired in set date. Sign in again.')
+            if(!date) return new ForbiddenError('Missing Somethings')
             await koa.model('User').findByIdAndUpdate(koa.uid, { birthday: date })
             return '您的生日已經更改成功囉 !'
         } catch (error) {
@@ -190,6 +193,7 @@ module.exports = {
     set_password: async(_, { password }, { koa }) => {
         try {
             if(!koa.uid) return new ForbiddenError('Your session expired in set password. Sign in again.')
+            if(!password) return new ForbiddenError('Missing Somethings')
             let encrypt = await bcrypt.hash(password, Number(process.env.SALT_ROUNDS))
             await koa.model('User').findByIdAndUpdate(koa.uid, { password: encrypt })
             return '您的密碼已經更改成功囉 !'
