@@ -8,7 +8,9 @@ module.exports = {
     getAll: async (_, __, { koa }) => await koa.model('User').find(),
     getRefresh: async(_, __, { koa }) => {
         try {
+            if(!koa.uid) return new ForbiddenError('Your session expired in getRefresh. Sign in again.')
             const { accessToken } = helpers.generate_token(koa.uid)
+            console.log('generate token success')
             return { access_token: accessToken, access_token_expirationDate: new Date().getTime() + 1000 * 60 * 60 }
         } catch (error) {
             console.log('This is get refresh error', error)
@@ -16,7 +18,7 @@ module.exports = {
     },
     getMe: async (_, __, { koa }) => {
         try {
-            if(!koa.uid) return new ForbiddenError('Your session expired. Sign in again.')
+            if(!koa.uid) return new ForbiddenError('Your session expired in GetMe. Sign in again.')
             return await koa.model('User').findById(koa.uid)
         } catch (error) {
             console.log('This is getMe error', error)
@@ -24,7 +26,7 @@ module.exports = {
     },
     invalidateToken: async (_, __, { koa }) => {
         try {
-            if(!koa.uid) return new ForbiddenError('Your session expired. Sign in again.')
+            if(!koa.uid) return new ForbiddenError('Your session expired in invalid. Sign in again.')
             
             const user = await koa.model('User').findById(koa.uid)
 
@@ -43,12 +45,12 @@ module.exports = {
             await mailer.sendMail({
                 from: 'leepang8834@gmail.com.tw',
                 to: input.email,
-                subject: '驗證您的身分',
+                subject: '作品集要驗證您身分',
                 html: `
                     <p>您好! ${ input.username }</p>
                     <p>歡迎您加入作品集 !!</p>
                     <p>您的驗證碼是 ：<strong style="color: #ff4e2a;">${random_code}</strong></p>
-                    <p>*** 有效期間2分鐘 !! ***</p>
+                    <p>*** 有效期間24小時 !! ***</p>
                     <p>謝謝您註冊作品集，祝您有愉快的使用體驗</p>
                 `
             }, (error, info) => {
@@ -63,7 +65,7 @@ module.exports = {
             await koa.model('SignUpCode').create({ verify_code: random_code, id: uuidv4(), email: input.email, password: encrypt, username: input.username })
             setTimeout(() => {
                 koa.model('SignUpCode').deleteOne({ verify_code: random_code })
-            }, 1000*60*2 )
+            }, 1000 * 60 * 60 * 24 )
             return random_code
         } catch (error) {
             console.log('This is verify_signup mailer error', error)
@@ -92,12 +94,12 @@ module.exports = {
             await mailer.sendMail({
                 from: 'leepang8834@gmail.com.tw',
                 to: input.email,
-                subject: '驗證您的身分',
+                subject: '作品集要驗證您身分',
                 html: `
                     <p>您好! ${ user[0].username }</p>
                     <p>歡迎您回來 !!</p>
                     <p>您著驗證碼是 ：<strong style="color: #ff4e2a;">${ random_code }</strong></p>
-                    <p>*** 有效期間2分鐘 !! ***</p>
+                    <p>*** 有效期間24小時 !! ***</p>
                 `
             }, (error, info) => {
                 if (error) {
@@ -110,7 +112,7 @@ module.exports = {
             await koa.model('LogInCode').create({ verify_code: random_code, email: input.email })
             setTimeout(async ()=>{
                 await koa.model('LogInCode').deleteOne({ verify_code: random_code })
-            }, 1000 * 60 * 2 )
+            },  1000 * 60 * 60 * 24 )
             return random_code
         } catch(error) {
             console.log('This is verify_login error', error)
@@ -136,11 +138,11 @@ module.exports = {
             mailer.sendMail({
                 from: 'leepang8834@gmail.com.tw',
                 to: user[0].email,
-                subject: 'Forget Your Password?',
+                subject: '忘記您作品集的密碼了嗎 ?',
                 html: `
-                    <p>Hello! ${ user[0].username }</p>
-                    <p>Your Reset Password Code Is：<strong style="color: #ff4e2a;">${ password }</strong></p>
-                    <p>*** PLEASE REMEMBER TO CHANGE YOUR PASSWORD AFTER YOU LOGIN !! ***</p>
+                    <p>您好! ${ user[0].username }</p>
+                    <p>已為你重設一組密碼：<strong style="color: #ff4e2a;">${ password }</strong></p>
+                    <p>*** 請記得登入之後更換密碼 !! ***</p>
                 `
             }, (error, info) => {
                 if (error) {
@@ -159,7 +161,7 @@ module.exports = {
     },
     set_username: async(_, { name }, { koa }) => {
         try {
-            if(!koa.uid) return new ForbiddenError('Your session expired. Sign in again.')
+            if(!koa.uid) return new ForbiddenError('Your session expired in set user. Sign in again.')
             await koa.model('User').findByIdAndUpdate(koa.uid, { username: name })
             return 'Your Username Have Been Changed!'
         } catch (error) {
@@ -168,7 +170,7 @@ module.exports = {
     },
     set_gender: async(_, { gender }, { koa }) => {
         try {
-            if(!koa.uid) return new ForbiddenError('Your session expired. Sign in again.')
+            if(!koa.uid) return new ForbiddenError('Your session expired in set gender. Sign in again.')
             await koa.model('User').findByIdAndUpdate(koa.uid, { gender: gender })
             return 'Your Gender Have Benn Changed!'
         } catch (error) {
@@ -177,7 +179,7 @@ module.exports = {
     },
     set_date: async(_, { date }, { koa }) => {
         try {
-            if(!koa.uid) return new ForbiddenError('Your session expired. Sign in again.')
+            if(!koa.uid) return new ForbiddenError('Your session expired in set date. Sign in again.')
             await koa.model('User').findByIdAndUpdate(koa.uid, { birthday: date })
             return 'Your Birthday Have Benn Changed!'
         } catch (error) {
@@ -186,7 +188,7 @@ module.exports = {
     },
     set_password: async(_, { password }, { koa }) => {
         try {
-            if(!koa.uid) return new ForbiddenError('Your session expired. Sign in again.')
+            if(!koa.uid) return new ForbiddenError('Your session expired in set password. Sign in again.')
             let encrypt = await bcrypt.hash(password, Number(process.env.SALT_ROUNDS))
             await koa.model('User').findByIdAndUpdate(koa.uid, { password: encrypt })
             return 'Your Password Have Been Changed!'
@@ -196,7 +198,7 @@ module.exports = {
     },
     set_privacy: async(_, { privacy_value }, { koa }) => {
         try {
-            if(!koa.uid) return new ForbiddenError('Your Session expired. Sign in again.')
+            if(!koa.uid) return new ForbiddenError('Your Session expired in set privacy. Sign in again.')
             let theSharePrivacy = JSON.parse(privacy_value)
             await koa.model('User').updateOne({ privacy: theSharePrivacy.privacy })
             let user = await koa.model('Book').findOne({ id: theSharePrivacy.userId })
@@ -218,7 +220,7 @@ module.exports = {
     },
     google_login: async(_, { googleUser }, { koa }) => {
         try {
-            if(new Date().getTime() > Number.parseInt(koa.provider_token_expired)) return new ForbiddenError('Your session expired. Sign in again.')
+            if(new Date().getTime() > Number.parseInt(koa.provider_token_expired)) return new ForbiddenError('Your session expired in google login. Sign in again.')
             let user_from_google = decode(googleUser)
             let user = await koa.model('User').find({ email: user_from_google.email })
             if(user.length == 0){
@@ -236,7 +238,7 @@ module.exports = {
     },
     facebook_login: async(_, { facebookUser }, { koa }) => {
         try {
-            if(new Date().getTime() > Number.parseInt(koa.provider_token_expired)) return new ForbiddenError('Your session expired. Sign in again.')
+            if(new Date().getTime() > Number.parseInt(koa.provider_token_expired)) return new ForbiddenError('Your session expired in facebook login. Sign in again.')
             let user_from_fb = JSON.parse(facebookUser)
             let user = await koa.model('User').find({ email: user_from_fb.email })
             if(user.length == 0){

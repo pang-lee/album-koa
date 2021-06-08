@@ -54,69 +54,65 @@ app.use(mongoose({
 app.use(async(ctx, next) => {
   if (!ctx.req.headers.cookie) return next()
 
-  let accessToken
-  let refreshToken
-  let brand
-
+  let accessToken = ctx.req.headers.cookie.split(';').find((c) => c.trim().startsWith('album_access_token=')).split('=')[1]
+  let refreshToken = ctx.req.headers.cookie.split(';').find((c) => c.trim().startsWith('album_refresh_token=')).split('=')[1]
+  let accessExpired = ctx.req.headers.cookie.split(';').find((c) => c.trim().startsWith('album_access_token_expirationDate=')).split('=')[1]
+  let refreshExpired = ctx.req.headers.cookie.split(';').find((c) => c.trim().startsWith('album_refresh_token_expirationDate=')).split('=')[1]
   let provider = ctx.req.headers.cookie.split(';').find((c) => c.trim().startsWith('Idp='))
-  if(provider) brand = provider.split('=')[1]
-
-  let accessCookie = ctx.req.headers.cookie.split(';').find((c) => c.trim().startsWith('album_access_token='))
-  if(accessCookie) accessToken = accessCookie.split('=')[1]
 
   if(!provider){
-    let accessCookie = ctx.req.headers.cookie.split(';').find((c) => c.trim().startsWith('album_access_token='))
-    if(accessCookie) accessToken = accessCookie.split('=')[1]
-    let refreshCookie = ctx.req.headers.cookie.split(';').find((c) => c.trim().startsWith('album_refresh_token='))
-    if(refreshCookie) refreshToken = refreshCookie.split('=')[1]
-  }
+    if(!accessToken && !refreshToken) return next()
 
-  if(!accessToken && !refreshToken) return next()
-
-  if(accessToken){
-    try {
-      if(!provider){
-        const data = verify(accessToken, process.env.ACCESS_TOKEN_SECRET)
+    if(new Date().getTime() < Number.parseInt(accessExpired) && accessToken){
+      try {
+        let data = verify(accessToken, process.env.ACCESS_TOKEN_SECRET)
         ctx.uid = data.uid
         return next()
+      } catch {
+        return next()
       }
-      
+    } else if(new Date().getTime() > Number.parseInt(accessExpired) && new Date().getTime() < Number.parseInt(refreshExpired)){
+      try {
+        let data = verify(refreshToken, process.env.REFRESH_TOKEN_SECRET)
+
+        let user = await ctx.model('User').findById(data.uid)
+
+        if (!user || user.count !== data.count) {
+          return next()
+        }
+
+        ctx.uid = user._id
+        return next()
+      } catch {
+        return next()
+      }
+    }
+  }
+
+
+
+  if(provider){
+    try {
       let expired_cookies
       
-      if(brand == 'google') expired_cookies = ctx.req.headers.cookie.split(';').find((c) => c.trim().startsWith('google_expirationDate='))
-      
-      if(brand == 'facebook') expired_cookies = ctx.req.headers.cookie.split(';').find((c) => c.trim().startsWith('facebook_expirationDate='))
+      if(provider == 'google') expired_cookies = ctx.req.headers.cookie.split(';').find((c) => c.trim().startsWith('google_expirationDate='))
+  
+      if(provider == 'facebook') expired_cookies = ctx.req.headers.cookie.split(';').find((c) => c.trim().startsWith('facebook_expirationDate='))
       
       ctx.provider_token_expired = expired_cookies.split('=')[1]
+
       let { uid } = verify(accessToken, process.env.ACCESS_TOKEN_SECRET)
+      
       ctx.uid = uid
 
       return next()
     } catch {
       return next()
     }
+
   }
 
-  if (!refreshToken) return next()
-    
-  if(refreshToken){
-    try {
-      let data = verify(refreshToken, process.env.REFRESH_TOKEN_SECRET)
-    
-      const user = await ctx.model('User').findById(data.uid)
-
-      if (!user || user.count !== data.count) {
-        return next()
-      }
-      
-      ctx.uid = user._id
-      return next()
-    } catch {
-      return next()
-    }
-  }
-
-  next()
+  return next()
 })
 
 const server = new ApolloServer({
