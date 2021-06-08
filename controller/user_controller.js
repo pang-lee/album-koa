@@ -98,7 +98,7 @@ module.exports = {
                 html: `
                     <p>您好! ${ user[0].username }</p>
                     <p>歡迎您回來 !!</p>
-                    <p>您著驗證碼是 ：<strong style="color: #ff4e2a;">${ random_code }</strong></p>
+                    <p>您的驗證碼是 ：<strong style="color: #ff4e2a;">${ random_code }</strong></p>
                     <p>*** 有效期間24小時 !! ***</p>
                 `
             }, (error, info) => {
