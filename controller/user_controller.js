@@ -10,7 +10,6 @@ module.exports = {
         try {
             if(!koa.uid) return new ForbiddenError('Your session expired in getRefresh. Sign in again.')
             const { accessToken } = helpers.generate_token(koa.uid)
-            console.log('generate token success')
             return { access_token: accessToken, access_token_expirationDate: new Date().getTime() + 1000 * 60 * 60 }
         } catch (error) {
             console.log('This is get refresh error', error)
