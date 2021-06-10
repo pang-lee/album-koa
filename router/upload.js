@@ -1,7 +1,32 @@
 const router = require('koa-router')()
 const multer = require('@koa/multer')
 const { storage, readableStream } = require('../helpers/helper')
-const upload = multer({ storage })
+// const upload = multer({ storage })
+const upload = multer({ storage, limits: { fileSize: 10 }})
+
+router.post('/avatar', async(ctx, next) => {
+    try {
+        if(ctx.uid){
+            let img_error = await upload.single('avatar')(ctx, next).catch(err => err)
+            console.log(img_error)
+            if(img_error) return ctx.body = img_error.message
+            let user = await ctx.model('User').findById(ctx.uid)
+            if(user.avatar !== ''){
+                let old = await ctx.gridFS.findOne(user.avatar)
+                await ctx.gridFS.delete(old._id)
+            }
+            await ctx.model('User').findByIdAndUpdate(ctx.uid, { avatar: ctx.request.header.field })
+            let img = await ctx.gridFS.findOne(user.avatar)
+            let avatar = await ctx.gridFS.readFileStream(img._id)
+            let stream = await readableStream(avatar)
+            return ctx.body = stream
+        }
+        return next()
+    } catch (error) {
+        console.log('This is post avatar error', error)
+        return next()
+    }
+})
 
 router.get('/avatar', async(ctx, next) =>{
     try {
@@ -20,26 +45,26 @@ router.get('/avatar', async(ctx, next) =>{
     }
 })
 
-router.post('/avatar', upload.single('avatar'), async(ctx, next) => {
-    try {
-        if(ctx.uid){
-            let user = await ctx.model('User').findById(ctx.uid)
-            if(user.avatar !== ''){
-                let old = await ctx.gridFS.findOne(user.avatar)
-                await ctx.gridFS.delete(old._id)
-            }
-            await ctx.model('User').findByIdAndUpdate(ctx.uid, { avatar: ctx.request.header.field })
-            let img = await ctx.gridFS.findOne(user.avatar)
-            let avatar = await ctx.gridFS.readFileStream(img._id)
-            let stream = await readableStream(avatar)
-            return ctx.body = stream
-        }
-        return next()
-    } catch (error) {
-        console.log('This is post avatar error', error)
-        return next()
-    }
-})
+// router.post('/avatar', upload.single('avatar'), async(ctx, next) => {
+//     try {
+//         if(ctx.uid){
+//             let user = await ctx.model('User').findById(ctx.uid)
+//             if(user.avatar !== ''){
+//                 let old = await ctx.gridFS.findOne(user.avatar)
+//                 await ctx.gridFS.delete(old._id)
+//             }
+//             await ctx.model('User').findByIdAndUpdate(ctx.uid, { avatar: ctx.request.header.field })
+//             let img = await ctx.gridFS.findOne(user.avatar)
+//             let avatar = await ctx.gridFS.readFileStream(img._id)
+//             let stream = await readableStream(avatar)
+//             return ctx.body = stream
+//         }
+//         return next()
+//     } catch (error) {
+//         console.log('This is post avatar error', error)
+//         return next()
+//     }
+// })
 
 router.get('/bookImg', async(ctx, next) => {
     try {
